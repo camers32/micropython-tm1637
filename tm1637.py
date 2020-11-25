@@ -126,15 +126,31 @@ class TM1637(object):
     def encode_digit(self, digit):
         """Convert a character 0-9, a-f to a segment."""
         return _SEGMENTS[digit & 0x0f]
-
+    
     def encode_string(self, string):
-        """Convert an up to 4 character length string containing 0-9, a-z,
-        space, dash, star to an array of segments, matching the length of the
-        source string."""
-        segments = bytearray(len(string))
+        """Convert a string to LED segments.
+
+        Convert an up to 4 character length string containing 0-9, a-z,
+        space, dash, star and '.' to an array of segments, matching the length of
+        the source string."""
+        segments = bytearray(len(string.replace('.','')))
+        j = 0
         for i in range(len(string)):
-            segments[i] = self.encode_char(string[i])
+            if string[i] == '.' and j > 0:
+                segments[j-1] |= TM1637_MSB
+                continue
+            segments[j] = self.encode_char(string[i])
+            j += 1
         return segments
+
+    #def encode_string(self, string):
+    #   """Convert an up to 4 character length string containing 0-9, a-z,
+    #    space, dash, star to an array of segments, matching the length of the
+    #   source string."""
+    #   segments = bytearray(len(string))
+    #    for i in range(len(string)):
+    #       segments[i] = self.encode_char(string[i])
+    #   return segments
 
     def encode_char(self, char):
         """Convert a character 0-9, a-z, space, dash or star to a segment."""
